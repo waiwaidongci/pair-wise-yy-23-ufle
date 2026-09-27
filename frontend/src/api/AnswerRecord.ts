@@ -1,21 +1,24 @@
-import { mockData } from "../mocks/seedData";
 import type { AnswerRecord } from "../types/AnswerRecord";
+import { STORE, dbGetAll, dbPut } from "../services/db";
+import { writeCreateLog, writeExportLog } from "../services/logService";
 
-const endpoint = "/api/answer-record";
-
-export async function listAnswerRecord(): Promise<AnswerRecord[]> {
-  if (typeof fetch !== "undefined" && endpoint.startsWith("/api") && false) {
-    try {
-      const res = await fetch(endpoint);
-      if (res.ok) return await res.json();
-    } catch {
-      // Local mock fallback keeps the UI available during offline review.
-    }
-  }
-  return [...(mockData.answerRecord as unknown as AnswerRecord[])];
+export async function listAnswerRecords(): Promise<AnswerRecord[]> {
+  const rows = await dbGetAll<AnswerRecord>(STORE.answers);
+  return rows.sort((a, b) => a.created_at.localeCompare(b.created_at));
 }
 
-export async function saveAnswerRecord(payload: AnswerRecord) {
-  console.info("save AnswerRecord", payload);
-  return payload;
+export async function createAnswerRecord(payload: AnswerRecord): Promise<AnswerRecord> {
+  writeCreateLog("AnswerRecord", {
+    id: payload.id,
+    sessionId: payload.session_id,
+    symbolId: payload.symbol_id,
+    correct: payload.correct
+  });
+  return dbPut(STORE.answers, payload);
+}
+
+export async function exportAnswerRecords(): Promise<AnswerRecord[]> {
+  const rows = await listAnswerRecords();
+  writeExportLog("AnswerRecord", { count: rows.length });
+  return rows;
 }

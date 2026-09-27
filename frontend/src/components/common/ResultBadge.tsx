@@ -1,5 +1,14 @@
-import { StatusBadge } from "./StatusBadge";
+interface ResultBadgeProps {
+  correct: boolean;
+  detail?: string;
+}
 
-export function ResultBadge({ title = "ResultBadge", value = "READY" }: { title?: string; value?: string }) {
-  return <div className="shared-widget"><strong>{title}</strong><StatusBadge value={value} /></div>;
+/** 提交答案后的即时结果徽标 */
+export function ResultBadge({ correct, detail }: ResultBadgeProps) {
+  return (
+    <span className={`result-badge ${correct ? "result-ok" : "result-ng"}`} role="status">
+      {correct ? "✓ 回答正确" : "✗ 回答错误"}
+      {detail ? <em>{detail}</em> : null}
+    </span>
+  );
 }

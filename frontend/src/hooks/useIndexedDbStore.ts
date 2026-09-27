@@ -1,8 +1,32 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { getErrorMessage } from "../services/errors";
 
-export function useIndexedDbStore<T>(rows: T[] = []) {
-  const [page, setPage] = useState(1);
-  const pageSize = 8;
-  const pageRows = useMemo(() => rows.slice((page - 1) * pageSize, page * pageSize), [rows, page]);
-  return { page, setPage, pageSize, pageRows, total: rows.length };
+/**
+ * 通用的 IndexedDB 只读加载 hook：
+ * 页面通过 api 层的 async loader 读取本地数据，并支持手动 reload。
+ */
+export function useIndexedDbStore<T>(loader: () => Promise<T[]>, deps: unknown[] = []) {
+  const [rows, setRows] = useState<T[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const reload = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await loader();
+      setRows(data);
+      setError("");
+    } catch (cause) {
+      setError(getErrorMessage(cause));
+    } finally {
+      setLoading(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps);
+
+  useEffect(() => {
+    void reload();
+  }, [reload]);
+
+  return { rows, loading, error, reload };
 }

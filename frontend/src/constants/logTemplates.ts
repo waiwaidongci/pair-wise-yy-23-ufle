@@ -2,5 +2,9 @@ export const LOG_TEMPLATES = {
   BrailleSymbol: ["点字字符创建", "点字字符更新", "点字字符状态变更", "点字字符导出"],
   Lesson: ["课程创建", "课程更新", "课程状态变更", "课程导出"],
   PracticeSession: ["练习会话创建", "练习会话更新", "练习会话状态变更", "练习会话导出"],
-  AnswerRecord: ["答题记录创建", "答题记录更新", "答题记录状态变更", "答题记录导出"]
-};
+  AnswerRecord: ["答题记录创建", "答题记录更新", "答题记录状态变更", "答题记录导出"],
+  MistakeEntry: ["错题创建", "错题连续答对计数更新", "错题掌握状态变更", "错题导出"]
+} as const;
+
+export type LogEntity = keyof typeof LOG_TEMPLATES;
+export type LogAction = 0 | 1 | 2 | 3;
