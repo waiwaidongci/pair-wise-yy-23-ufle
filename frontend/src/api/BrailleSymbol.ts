@@ -1,21 +1,16 @@
-import { mockData } from "../mocks/seedData";
+import { bulkPut, getAll, put } from "./db";
+import { LOCAL_STORE } from "../constants/practice";
 import type { BrailleSymbol } from "../types/BrailleSymbol";
 
-const endpoint = "/api/braille-symbol";
-
+/** 点字字符的本地模拟 API（IndexedDB 持久化，禁止接入第三方） */
 export async function listBrailleSymbol(): Promise<BrailleSymbol[]> {
-  if (typeof fetch !== "undefined" && endpoint.startsWith("/api") && false) {
-    try {
-      const res = await fetch(endpoint);
-      if (res.ok) return await res.json();
-    } catch {
-      // Local mock fallback keeps the UI available during offline review.
-    }
-  }
-  return [...(mockData.brailleSymbol as unknown as BrailleSymbol[])];
+  return getAll<BrailleSymbol>(LOCAL_STORE.symbols);
 }
 
-export async function saveBrailleSymbol(payload: BrailleSymbol) {
-  console.info("save BrailleSymbol", payload);
-  return payload;
+export async function saveBrailleSymbol(payload: BrailleSymbol): Promise<BrailleSymbol> {
+  return put(LOCAL_STORE.symbols, payload);
+}
+
+export async function importBrailleSymbols(rows: BrailleSymbol[]): Promise<BrailleSymbol[]> {
+  return bulkPut(LOCAL_STORE.symbols, rows);
 }
